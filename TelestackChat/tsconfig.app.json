@@ -26,13 +26,7 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
-    "paths": {
-      "@telestack/db-sdk": [
-        "../TelestackSDK/src/index.ts"
-      ]
-    }
+    "noUncheckedSideEffectImports": true
   },
   "include": [
     "src"
