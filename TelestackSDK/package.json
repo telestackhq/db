@@ -4,6 +4,10 @@
     "description": "Fluent, real-time SDK for Telestack DB",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "files": [
+        "dist",
+        "README.md"
+    ],
     "scripts": {
         "build": "tsc",
         "test": "vitest",
