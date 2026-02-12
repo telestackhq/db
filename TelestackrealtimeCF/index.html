@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+<button onclick="connect()">Connect</button>
+
+<script src="https://cdn.jsdelivr.net/npm/centrifuge@5/dist/centrifuge.min.js"></script>
+
+<script>
+
+function connect() {
+
+  const centrifuge = new Centrifuge(
+    "ws://localhost:8000/connection/websocket"
+  );
+
+  centrifuge.on('connected', function(ctx) {
+    console.log("Connected:", ctx);
+  });
+
+  const sub = centrifuge.newSubscription("chat:room1");
+
+  sub.on('publication', function(ctx) {
+    console.log("Received message:", ctx.data);
+  });
+
+  sub.subscribe();
+
+  centrifuge.connect();
+}
+
+
+</script>
+
+</body>
+</html>

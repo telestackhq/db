@@ -1,0 +1,15 @@
+name = "telestack-realtime-db"
+main = "src/index.ts"
+compatibility_date = "2024-02-10"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "telestack_realtime_db_prod"
+database_id = "507716ac-9e8f-4749-8741-204e4274a4d8"
+
+[vars]
+CENTRIFUGO_API_KEY = "api_7d2f9a1e4b83c5d6e0f1a2b3c4d5e6f7"
+CENTRIFUGO_API_URL = "https://telestack-centrifugo.onrender.com/api"
+TOKEN_SECRET = "5e8a7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e"
+
+
