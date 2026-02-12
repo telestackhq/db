@@ -321,7 +321,7 @@ export default {
 
                         // 1. Prepare Event Insert
                         d1Ops.push(env.DB.prepare(
-                            `INSERT INTO events(id, doc_id, workspace_id, event_type, payload) VALUES(?, ?, ?, ?, ?)`
+                            `INSERT INTO events(version, id, doc_id, workspace_id, event_type, payload) VALUES(NULL, ?, ?, ?, ?, ?)`
                         ).bind(eventId, id, workspaceId, eventType, JSON.stringify(data || {})));
 
                         // 2. Prepare Doc Op
@@ -408,7 +408,7 @@ VALUES(?, ?, ?, ?, ?, ?, (SELECT last_insert_rowid()))
                     try {
                         // 1. Insert Event to get the version
                         const eventRes = await env.DB.prepare(
-                            `INSERT INTO events (id, doc_id, workspace_id, event_type, payload) VALUES (?, ?, ?, 'INSERT', ?)`
+                            `INSERT INTO events (version, id, doc_id, workspace_id, event_type, payload) VALUES (NULL, ?, ?, ?, 'INSERT', ?)`
                         ).bind(eventId, id, workspace, JSON.stringify(data)).run();
 
                         const version = eventRes.meta.last_row_id;
@@ -548,7 +548,7 @@ VALUES(?, ?, ?, ?, ?, ?, (SELECT last_insert_rowid()))
 
                         // UPDATE via SET
                         const eventRes = await env.DB.prepare(
-                            `INSERT INTO events (id, doc_id, workspace_id, event_type, payload) VALUES (?, ?, ?, 'SET', ?)`
+                            `INSERT INTO events (version, id, doc_id, workspace_id, event_type, payload) VALUES (NULL, ?, ?, ?, 'SET', ?)`
                         ).bind(eventId, docId, workspace, JSON.stringify(data)).run();
 
                         const version = eventRes.meta.last_row_id;
@@ -574,7 +574,7 @@ VALUES(?, ?, ?, ?, ?, ?, (SELECT last_insert_rowid()))
                         const collectionPath = parentPath ? `${parentPath}/${collection}` : `${collection}`;
 
                         const eventRes = await env.DB.prepare(
-                            `INSERT INTO events (id, doc_id, workspace_id, event_type, payload) VALUES (?, ?, ?, 'INSERT', ?)`
+                            `INSERT INTO events (version, id, doc_id, workspace_id, event_type, payload) VALUES (NULL, ?, ?, ?, 'INSERT', ?)`
                         ).bind(eventId, docId, workspace, JSON.stringify(data)).run();
 
                         const version = eventRes.meta.last_row_id;
@@ -605,7 +605,7 @@ VALUES(?, ?, ?, ?, ?, ?, (SELECT last_insert_rowid()))
                     }
 
                     const eventRes = await env.DB.prepare(
-                        `INSERT INTO events (id, doc_id, workspace_id, event_type, payload) VALUES (?, ?, ?, 'UPDATE', ?)`
+                        `INSERT INTO events (version, id, doc_id, workspace_id, event_type, payload) VALUES (NULL, ?, ?, ?, 'UPDATE', ?)`
                     ).bind(eventId, docId, workspace, JSON.stringify(data)).run();
 
                     const version = eventRes.meta.last_row_id;
@@ -649,7 +649,7 @@ VALUES(?, ?, ?, ?, ?, ?, (SELECT last_insert_rowid()))
                         }
 
                         const eventRes = await env.DB.prepare(
-                            `INSERT INTO events (id, doc_id, workspace_id, event_type, payload) VALUES (?, ?, ?, 'DELETE', '{}')`
+                            `INSERT INTO events (version, id, doc_id, workspace_id, event_type, payload) VALUES (NULL, ?, ?, ?, 'DELETE', '{}')`
                         ).bind(crypto.randomUUID(), docId, doc.workspace_id).run();
 
                         const version = eventRes.meta.last_row_id;
