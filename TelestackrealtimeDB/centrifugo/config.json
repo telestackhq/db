@@ -1,14 +1,12 @@
 {
     "client": {
+        "allowed_origins": [
+            "*"
+        ],
+        "insecure": true,
         "token": {
             "hmac_secret_key": "5e8a7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e"
-        },
-        "allowed_origins": [
-            "http://localhost:8787",
-            "http://localhost:3000",
-            "https://telestack-realtime-db.codeforgebyaravinth.workers.dev"
-        ],
-        "allow_anonymous_connect_without_token": false
+        }
     },
     "channel": {
         "namespaces": [
