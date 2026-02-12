@@ -271,6 +271,11 @@ export default {
                     }
                 }
 
+                if (collection === 'internal' && docId === 'schema' && method === 'GET') {
+                    const { results } = await env.DB.prepare("PRAGMA table_info(events)").all();
+                    return Response.json(results, { headers: corsHeaders });
+                }
+
                 // Internal Reset Endpoint
                 if (collection === 'internal' && docId === 'reset' && method === 'POST') {
                     await env.DB.batch([
