@@ -19,33 +19,108 @@ export default function App() {
     workspaceId: 'telestack-public-demo'
   }));
 
+  const subscriptionRef = useRef<any>(null);
+
   useEffect(() => {
-    // 1. Subscribe to real-time messages
-    const unsubscribe = db.collection('messages')
-      .orderBy('created_at', 'asc')
-      .onSnapshot((docs: any[]) => {
-        setMessages(docs);
-        setIsDbReady(true);
+    const messagesCollection = db.collection('messages');
+
+    // 1. Robust initialization with connection check
+    const init = async () => {
+      // Wait for Centrifuge to connect
+      await new Promise<void>((resolve) => {
+        const centrifuge = db.getCentrifuge();
+        if (centrifuge?.state === 'connected') {
+          resolve();
+        } else {
+          const onConnect = () => {
+            centrifuge?.off('connected', onConnect);
+            resolve();
+          };
+          centrifuge?.on('connected', onConnect);
+        }
       });
 
-    // 2. Initial presence check
-    const checkPresence = async () => {
-      try {
-        const stats = await db.getPresenceStats('collection:messages');
-        setPresenceCount(stats.numUsers);
-      } catch (e) {
-        console.warn("Presence check failed", e);
+      // 2. Initial presence check with retry
+      checkPresence();
+
+      // 3. Small delay to prevent StrictMode double-mount issues
+      setTimeout(() => {
+        // Cleanup existing if any
+        if (subscriptionRef.current) {
+          subscriptionRef.current();
+          subscriptionRef.current = null;
+        }
+
+        // Subscribe to real-time messages
+        const unsubSnapshot = messagesCollection
+          .orderBy('created_at', 'asc')
+          .onSnapshot((docs: any[]) => {
+            setMessages(docs);
+            setIsDbReady(true);
+          });
+
+        // Listen for presence changes
+        const unsubPresence = messagesCollection.onPresence(() => {
+          checkPresence();
+        });
+
+        subscriptionRef.current = () => {
+          unsubSnapshot();
+          unsubPresence();
+        };
+      }, 100);
+    };
+
+    init();
+
+    return () => {
+      if (subscriptionRef.current) {
+        subscriptionRef.current();
+        subscriptionRef.current = null;
+      }
+
+      // Force cleanup of Centrifuge subscriptions for this channel
+      const centrifuge = db.getCentrifuge();
+      if (centrifuge) {
+        const channel = `collection:messages`;
+        const sub = centrifuge.getSubscription(channel);
+        if (sub) {
+          sub.unsubscribe();
+          sub.removeAllListeners();
+        }
       }
     };
-    checkPresence();
-
-    // 3. Listen for presence changes
-    db.collection('messages').onPresence(() => {
-      checkPresence();
-    });
-
-    return () => unsubscribe();
   }, [db]);
+
+  const checkPresence = async () => {
+    try {
+      const channel = 'collection:messages';
+      // Retry logic with backoff
+      for (let i = 0; i < 5; i++) {
+        try {
+          if (db.getCentrifuge()?.state !== 'connected') {
+            await new Promise(r => setTimeout(r, 500));
+            continue;
+          }
+          const stats = await db.getPresenceStats(channel);
+          setPresenceCount(stats.numClients || stats.numUsers || 0);
+          return;
+        } catch (e) {
+          if (i === 4) throw e;
+          console.log(`⏳ Presence retry ${i + 1}/5...`);
+          await new Promise(r => setTimeout(r, 100 * Math.pow(2, i)));
+        }
+      }
+    } catch (e) {
+      console.warn("Presence check failed after retries", e);
+    }
+  };
+
+  // Periodic presence re-check
+  useEffect(() => {
+    const interval = setInterval(checkPresence, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
