@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@telestack/db-sdk": "^1.0.5",
+    "@telestack/db-sdk": "^1.0.6",
     "centrifuge": "^5.5.3",
     "framer-motion": "^12.34.0",
     "lucide-react": "^0.563.0",
